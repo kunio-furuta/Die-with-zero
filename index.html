@@ -50,8 +50,6 @@
     font-size: 0.95rem; outline: none; text-align: right;
   }
   input.comma-input:focus, input.plain-input:focus { border-color: #ffd200; }
-
-  /* 寿命欄を目立たせるハイライト */
   input.life-input {
     width: 100%; padding: 9px 36px 9px 12px; border-radius: 8px;
     border: 1px solid rgba(255,107,107,0.5);
@@ -59,7 +57,6 @@
     font-size: 1rem; font-weight: 700; outline: none; text-align: right;
   }
   input.life-input:focus { border-color: #ff6b6b; box-shadow: 0 0 0 2px rgba(255,107,107,0.2); }
-
   input[type="text"].name-input { width: 100%; padding: 9px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.08); color: #fff; font-size: 0.95rem; outline: none; }
   input[type="text"].name-input:focus { border-color: #ffd200; }
 
@@ -80,10 +77,10 @@
 
   .summary { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 20px; }
   .summary-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 16px; text-align: center; }
-  .summary-card.highlight { background: rgba(255,210,0,0.08); border-color: rgba(255,210,0,0.4); }
+  .summary-card.highlight { background: rgba(255,210,0,0.08); border-color: rgba(255,210,0,0.5); }
   .summary-card .slabel { font-size: 0.75rem; color: #aaa; margin-bottom: 4px; }
   .summary-card .sublabel { font-size: 0.68rem; color: #777; margin-bottom: 6px; line-height: 1.4; }
-  .summary-card .value { font-size: 1.4rem; font-weight: 700; }
+  .summary-card .value { font-size: 1.5rem; font-weight: 700; }
   .gold { color: #ffd200; } .red { color: #ff6b6b; } .green { color: #51cf66; }
 
   .chart-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 20px; margin-bottom: 20px; }
@@ -91,8 +88,12 @@
   .chart-card .chart-sub { font-size: 0.75rem; color: #888; margin-bottom: 14px; }
 
   .warn-banner { background: rgba(255,80,80,0.15); border: 1px solid rgba(255,80,80,0.4); border-radius: 10px; padding: 12px 18px; color: #ff8080; font-size: 0.9rem; margin-bottom: 16px; display: none; }
-  .surplus-box { background: rgba(116,192,252,0.08); border: 1px solid rgba(116,192,252,0.3); border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; font-size: 0.82rem; color: #aac8f0; line-height: 1.7; }
-  .surplus-box strong { color: #74c0fc; font-size: 1rem; }
+  .surplus-box { background: rgba(116,192,252,0.08); border: 1px solid rgba(116,192,252,0.3); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; font-size: 0.82rem; color: #aac8f0; line-height: 1.8; }
+  .surplus-box strong { color: #74c0fc; }
+
+  /* 均等表示ライン強調 */
+  .flat-line-hint { display: inline-block; background: rgba(255,210,0,0.15); border: 1px solid rgba(255,210,0,0.4); border-radius: 6px; padding: 2px 10px; font-size: 0.78rem; color: #ffd200; margin-left: 8px; vertical-align: middle; }
+
   .footer { text-align: center; color: #555; font-size: 0.75rem; padding: 20px 0; }
   .divider { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 12px 0; }
 </style>
@@ -118,14 +119,14 @@
 
   <div class="summary">
     <div class="summary-card highlight">
-      <div class="slabel">🎯 今日から使える自由なお金</div>
-      <div class="sublabel" id="dailySubLabel">固定費を除いた余裕資金を<br>運用しながら寿命でゼロにする額</div>
+      <div class="slabel">🎯 毎日使える自由なお金</div>
+      <div class="sublabel" id="dailySubLabel">死ぬまで毎日均等に使える額</div>
       <div class="value gold" id="sumDaily">—</div>
-      <div style="font-size:0.8rem;color:#ffd200;margin-top:2px">円/日</div>
+      <div style="font-size:0.8rem;color:#ffd200;margin-top:2px">円/日（均等・固定）</div>
     </div>
     <div class="summary-card">
-      <div class="slabel">余裕資産の状況</div>
-      <div class="sublabel" id="zeroSubLabel">寿命時点の固定費除く運用資産</div>
+      <div class="slabel">寿命時点の残高</div>
+      <div class="sublabel" id="zeroSubLabel">—歳時点の余裕資産</div>
       <div class="value" id="sumZeroAge">—</div>
     </div>
     <div class="summary-card">
@@ -143,28 +144,14 @@
   </div>
 
   <div class="grid">
-    <!-- 基本情報 -->
     <div class="card">
       <h2>👤 基本情報</h2>
-      <div class="form-group">
-        <label>現在の年齢（歳）</label>
-        <div class="input-wrap"><input class="plain-input" type="text" id="age" value="40"><span class="unit">歳</span></div>
-      </div>
-      <div class="form-group">
-        <label>💀 寿命年齢（何歳まで生きるか）</label>
-        <div class="input-wrap"><input class="life-input" type="text" id="lifeAge" value="100"><span class="unit" style="color:#ff8080">歳</span></div>
-      </div>
-      <div class="form-group">
-        <label>現在の総資産（円）</label>
-        <div class="input-wrap"><input class="comma-input" type="text" id="assets" value="10,000,000"><span class="unit">円</span></div>
-      </div>
-      <div class="form-group">
-        <label>資産運用利回り（%/年）</label>
-        <div class="input-wrap"><input class="plain-input" type="text" id="returnRate" value="3"><span class="unit">%</span></div>
-      </div>
+      <div class="form-group"><label>現在の年齢（歳）</label><div class="input-wrap"><input class="plain-input" type="text" id="age" value="40"><span class="unit">歳</span></div></div>
+      <div class="form-group"><label>💀 寿命年齢（何歳まで生きるか）</label><div class="input-wrap"><input class="life-input" type="text" id="lifeAge" value="100"><span class="unit" style="color:#ff8080">歳</span></div></div>
+      <div class="form-group"><label>現在の総資産（円）</label><div class="input-wrap"><input class="comma-input" type="text" id="assets" value="10,000,000"><span class="unit">円</span></div></div>
+      <div class="form-group"><label>資産運用利回り（%/年）</label><div class="input-wrap"><input class="plain-input" type="text" id="returnRate" value="3"><span class="unit">%</span></div></div>
     </div>
 
-    <!-- 収入 -->
     <div class="card">
       <h2>💰 収入</h2>
       <div class="form-group"><label>現在の年収（円/年）</label><div class="input-wrap"><input class="comma-input" type="text" id="annualIncome" value="6,500,000"><span class="unit">円</span></div></div>
@@ -182,7 +169,6 @@
       </div>
     </div>
 
-    <!-- 支出 -->
     <div class="card">
       <h2>🏠 毎月の固定支出</h2>
       <div class="form-group"><label>家賃・住居費（円/月）</label><div class="input-wrap"><input class="comma-input" type="text" id="rent" value="80,000"><span class="unit">円</span></div></div>
@@ -197,13 +183,13 @@
   </div>
 
   <div class="chart-card">
-    <h2>📈 余裕資産の推移</h2>
-    <div class="chart-sub" id="chartSub1">固定費・1日使用額を除いた運用資産の残高。寿命年齢でゼロを目指します。</div>
+    <h2>📈 余裕資産の推移 <span class="flat-line-hint">毎日D円均等使用後の残高</span></h2>
+    <div class="chart-sub" id="chartSub1">毎日一定額を使い続けたときの資産残高の変化。寿命年齢でゼロになります。</div>
     <canvas id="assetChart" height="80"></canvas>
   </div>
   <div class="chart-card">
-    <h2>📅 年齢別・1日あたり使える自由なお金</h2>
-    <div class="chart-sub">その年の余裕資産を残り日数で割った「1日あたりの自由使用可能額」の推移です。</div>
+    <h2>📅 毎日使える自由なお金 <span class="flat-line-hint">全期間で均等・一定</span></h2>
+    <div class="chart-sub">現在から寿命まで、毎日同じ金額を使い続けられます。グラフは水平な直線になります。</div>
     <canvas id="dailyChart" height="80"></canvas>
   </div>
 
@@ -261,9 +247,14 @@ function fmt(n) {
   return Math.round(n).toLocaleString();
 }
 
+// ────────────────────────────────────────────
+// メイン計算
+// 「毎日D円を均等に使い続け、寿命年齢で残高がゼロ」になるDを二分探索
+// 毎年の引き出し額 = D × 365（固定）
+// ────────────────────────────────────────────
 function calculate() {
   const ca      = toNum('age');
-  const lifeAge = Math.max(toNum('lifeAge'), ca + 1); // 最低でも現在+1歳
+  const lifeAge = Math.max(toNum('lifeAge'), ca + 1);
   const a0      = toNum('assets');
   const rr      = toNum('returnRate') / 100;
   const ai      = toNum('annualIncome');
@@ -280,16 +271,17 @@ function calculate() {
   }, 0);
   const annualFixed = toNum('rent')*12 + toNum('living')*12 + toNum('special') + extraTotal;
 
-  // 二分探索：寿命年齢でちょうど残高ゼロになる1日使用額Dを求める
-  function simulate(dailySpend) {
+  // シミュレーション：毎年「固定費 + D×365」を引く。Dは全期間で同じ値。
+  function simulate(dailyD) {
     let bal = a0;
-    const annualFree = dailySpend * 365;
+    const annualFree = dailyD * 365;
     const balArr = [];
     let ti = 0, te = 0;
     for (let age = ca; age <= lifeAge; age++) {
-      const inc = (age < ra ? ai : 0)
+      const inc = (age < ra  ? ai      : 0)
                 + (age >= psa ? pm * 12 : 0)
                 + (age >= ss && age <= se ? si : 0);
+      // 運用益を乗せてから収入を加算し、固定費と自由使用額を引く
       bal = bal * (1 + rr) + inc - annualFixed - annualFree;
       ti += inc;
       te += annualFixed;
@@ -298,6 +290,7 @@ function calculate() {
     return { balArr, finalBal: bal, ti, te };
   }
 
+  // 二分探索：finalBal = 0 になるDを求める
   let lo = 0, hi = 1_000_000_000;
   for (let i = 0; i < 64; i++) {
     const mid = (lo + hi) / 2;
@@ -311,30 +304,30 @@ function calculate() {
   let za = null;
   for (let i = 0; i <= lifeAge - ca; i++) {
     const age = ca + i;
-    const remDays = (lifeAge - age) * 365;
     ages.push(age + '歳');
     ad.push(balArr[i]);
-    dd.push(remDays > 0 ? Math.round(balArr[i] / remDays) : 0);
+    // 1日使用額グラフは全年齢で同じ値（均等）
+    dd.push(optimalDaily);
     if (balArr[i] < 0 && !za) za = age;
   }
 
-  // 初年度収支サマリー
+  // 概要ボックス
   const fyInc = (ca < ra ? ai : 0) + (ca >= psa ? pm*12 : 0) + (ca >= ss && ca <= se ? si : 0);
   const fySurplus = fyInc - annualFixed;
   document.getElementById('surplusBox').innerHTML =
-    `<b>📊 シミュレーション概要（寿命：${lifeAge}歳）：</b><br>` +
+    `<b>📊 シミュレーション概要（${ca}歳 → ${lifeAge}歳 / 残り${lifeAge-ca}年）：</b><br>` +
     `現在の年間収入 <strong>${fyInc.toLocaleString()}円</strong> ／ ` +
     `年間固定支出 <strong>${annualFixed.toLocaleString()}円</strong> ／ ` +
     `年間収支差 <strong style="color:${fySurplus>=0?'#51cf66':'#ff6b6b'}">${fySurplus>=0?'+':''}${fySurplus.toLocaleString()}円</strong><br>` +
-    `総資産 <strong>${a0.toLocaleString()}円</strong> を利回り <strong>${toNum('returnRate')}%</strong> で運用しながら、` +
-    `固定費を払い続け、<strong style="color:#ffd200">${lifeAge}歳でちょうどゼロ</strong>になるよう逆算しています。`;
+    `総資産 <strong>${a0.toLocaleString()}円</strong> を利回り <strong>${toNum('returnRate')}%</strong> で運用しながら固定費を支払い、` +
+    `<strong style="color:#ffd200">毎日 ${optimalDaily.toLocaleString()}円</strong> を均等に使い続けると、` +
+    `<strong style="color:#ffd200">${lifeAge}歳でちょうどゼロ</strong>になります。`;
 
-  // サマリーカードのラベルも寿命年齢に合わせて更新
-  document.getElementById('dailySubLabel').textContent = `固定費を除いた余裕資金を運用しながら${lifeAge}歳でゼロにする額`;
-  document.getElementById('zeroSubLabel').textContent  = `${lifeAge}歳時点の固定費除く運用資産`;
-  document.getElementById('chartSub1').textContent     = `固定費・1日使用額を除いた運用資産の残高。${lifeAge}歳でゼロを目指します。`;
+  // サマリー更新
+  document.getElementById('dailySubLabel').textContent = `${ca}歳〜${lifeAge}歳まで毎日均等に使える額`;
+  document.getElementById('zeroSubLabel').textContent  = `${lifeAge}歳時点の余裕資産残高`;
 
-  document.getElementById('sumDaily').textContent = optimalDaily.toLocaleString();
+  document.getElementById('sumDaily').textContent        = optimalDaily.toLocaleString();
   document.getElementById('sumTotalIncome').textContent  = fmt(ti);
   document.getElementById('sumTotalExpense').textContent = fmt(te);
 
@@ -343,33 +336,56 @@ function calculate() {
   if (za) {
     ze.textContent = za + '歳でゼロ'; ze.className = 'value red';
     wb.style.display = 'block';
-    wb.textContent = `⚠️ ${za}歳で余裕資産がゼロになります。固定支出を見直すか、収入を増やしてください。`;
+    wb.textContent = `⚠️ ${za}歳で資産がゼロになります。固定支出の見直しや収入増加を検討してください。`;
   } else {
     ze.textContent = lifeAge + '歳で ≈ 0円'; ze.className = 'value green';
     wb.style.display = 'none';
   }
 
+  document.getElementById('chartSub1').textContent =
+    `毎日 ${optimalDaily.toLocaleString()}円を均等に使い続けたときの資産残高推移。${lifeAge}歳でゼロになります。`;
+
   const sc = {
     x: { ticks:{color:'#888',maxTicksLimit:13,font:{size:11}}, grid:{color:'rgba(255,255,255,0.05)'} },
-    y: { ticks:{color:'#888',font:{size:11}, callback: v => Math.abs(v)>=1e8?(v/1e8).toFixed(0)+'億':Math.abs(v)>=1e4?Math.round(v/1e4)+'万':v }, grid:{color:'rgba(255,255,255,0.05)'} }
+    y: { ticks:{color:'#888',font:{size:11}, callback: v =>
+      Math.abs(v)>=1e8?(v/1e8).toFixed(0)+'億':Math.abs(v)>=1e4?Math.round(v/1e4)+'万':v
+    }, grid:{color:'rgba(255,255,255,0.05)'} }
   };
 
   if (assetChart) assetChart.destroy();
   assetChart = new Chart(document.getElementById('assetChart'), {
-    type:'line',
-    data:{ labels:ages, datasets:[{ data:ad, borderColor:'#ffd200', backgroundColor:'rgba(255,210,0,0.08)', fill:true, tension:0.3, pointRadius:0, borderWidth:2 }]},
-    options:{ responsive:true, interaction:{mode:'index',intersect:false},
-      plugins:{ legend:{display:false}, tooltip:{backgroundColor:'rgba(0,0,0,0.8)', callbacks:{label: c=>' 余裕資産残高: '+c.parsed.y.toLocaleString()+' 円'}}},
-      scales:sc }
+    type: 'line',
+    data: { labels: ages, datasets:[{
+      data: ad, borderColor:'#ffd200', backgroundColor:'rgba(255,210,0,0.08)',
+      fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2
+    }]},
+    options: { responsive:true, interaction:{mode:'index',intersect:false},
+      plugins:{ legend:{display:false}, tooltip:{backgroundColor:'rgba(0,0,0,0.8)',
+        callbacks:{label: c=>' 余裕資産残高: '+c.parsed.y.toLocaleString()+' 円'}}},
+      scales: sc }
   });
 
   if (dailyChart) dailyChart.destroy();
   dailyChart = new Chart(document.getElementById('dailyChart'), {
-    type:'line',
-    data:{ labels:ages, datasets:[{ data:dd, borderColor:'#74c0fc', backgroundColor:'rgba(116,192,252,0.08)', fill:true, tension:0.3, pointRadius:0, borderWidth:2 }]},
-    options:{ responsive:true, interaction:{mode:'index',intersect:false},
-      plugins:{ legend:{display:false}, tooltip:{backgroundColor:'rgba(0,0,0,0.8)', callbacks:{label: c=>' 1日の自由使用額: '+c.parsed.y.toLocaleString()+' 円'}}},
-      scales:sc }
+    type: 'line',
+    data: { labels: ages, datasets:[{
+      data: dd, borderColor:'#74c0fc', backgroundColor:'rgba(116,192,252,0.1)',
+      fill: true, tension: 0, pointRadius: 0, borderWidth: 2.5
+      // tension:0 で完全な水平線になる
+    }]},
+    options: {
+      responsive: true, interaction:{mode:'index',intersect:false},
+      plugins:{ legend:{display:false}, tooltip:{backgroundColor:'rgba(0,0,0,0.8)',
+        callbacks:{label: c=>' 毎日の自由使用額: '+c.parsed.y.toLocaleString()+' 円（均等固定）'}}},
+      scales: {
+        x: sc.x,
+        y: {
+          ...sc.y,
+          min: 0,
+          max: optimalDaily * 1.5,  // 水平線が見やすいようにY軸の余白を確保
+        }
+      }
+    }
   });
 }
 
@@ -380,37 +396,27 @@ function gatherData() {
     amount: ((document.getElementById('eamt-'+e.id)||{}).value||'').replace(/,/g,'')
   }));
   return {
-    age:            document.getElementById('age').value,
-    lifeAge:        document.getElementById('lifeAge').value,
-    assets:         toNum('assets'),
-    returnRate:     document.getElementById('returnRate').value,
-    annualIncome:   toNum('annualIncome'),
-    retireAge:      document.getElementById('retireAge').value,
-    pensionStartAge:document.getElementById('pensionStartAge').value,
+    age: document.getElementById('age').value,
+    lifeAge: document.getElementById('lifeAge').value,
+    assets: toNum('assets'), returnRate: document.getElementById('returnRate').value,
+    annualIncome: toNum('annualIncome'), retireAge: document.getElementById('retireAge').value,
+    pensionStartAge: document.getElementById('pensionStartAge').value,
     pensionMonthly: toNum('pensionMonthly'),
-    sideStartAge:   document.getElementById('sideStartAge').value,
-    sideEndAge:     document.getElementById('sideEndAge').value,
-    sideIncome:     toNum('sideIncome'),
-    rent:           toNum('rent'),
-    living:         toNum('living'),
-    special:        toNum('special'),
-    extras
+    sideStartAge: document.getElementById('sideStartAge').value,
+    sideEndAge: document.getElementById('sideEndAge').value,
+    sideIncome: toNum('sideIncome'),
+    rent: toNum('rent'), living: toNum('living'), special: toNum('special'), extras
   };
 }
-
 function saveData() {
   const encoded = btoa(encodeURIComponent(JSON.stringify(gatherData())));
   const url = location.href.split('?')[0] + '?d=' + encoded;
   document.getElementById('saveUrlText').textContent = url;
   document.getElementById('saveUrlBox').classList.add('show');
-  const doCopy = () => {
-    if (navigator.clipboard) { navigator.clipboard.writeText(url).then(showToast); }
-    else { const t=document.createElement('textarea'); t.value=url; document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t); showToast(); }
-  };
-  doCopy();
+  doCopy(url);
 }
-function copyUrl() {
-  const url = document.getElementById('saveUrlText').textContent;
+function copyUrl() { doCopy(document.getElementById('saveUrlText').textContent); }
+function doCopy(url) {
   if (navigator.clipboard) { navigator.clipboard.writeText(url).then(showToast); }
   else { const t=document.createElement('textarea'); t.value=url; document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t); showToast(); }
 }
@@ -419,28 +425,20 @@ function showToast() {
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3000);
 }
-
 function loadFromUrl() {
   const d = new URLSearchParams(location.search).get('d');
   if (!d) return;
   try {
     const data = JSON.parse(decodeURIComponent(atob(d)));
     const set  = (id, val) => { const el=document.getElementById(id); if(el) el.value=val; };
-    const setC = (id, val) => { const el=document.getElementById(id); if(el) el.value=parseInt(val).toLocaleString('ja-JP'); };
-    set('age', data.age);
-    set('lifeAge', data.lifeAge ?? 100);   // 旧データ互換
-    setC('assets', data.assets);
-    set('returnRate', data.returnRate);
-    setC('annualIncome', data.annualIncome);
-    set('retireAge', data.retireAge);
-    set('pensionStartAge', data.pensionStartAge);
-    setC('pensionMonthly', data.pensionMonthly);
-    set('sideStartAge', data.sideStartAge);
-    set('sideEndAge', data.sideEndAge);
+    const setC = (id, val) => { const el=document.getElementById(id); if(el && val) el.value=parseInt(val).toLocaleString('ja-JP'); };
+    set('age', data.age); set('lifeAge', data.lifeAge ?? 100);
+    setC('assets', data.assets); set('returnRate', data.returnRate);
+    setC('annualIncome', data.annualIncome); set('retireAge', data.retireAge);
+    set('pensionStartAge', data.pensionStartAge); setC('pensionMonthly', data.pensionMonthly);
+    set('sideStartAge', data.sideStartAge); set('sideEndAge', data.sideEndAge);
     setC('sideIncome', data.sideIncome);
-    setC('rent', data.rent);
-    setC('living', data.living);
-    setC('special', data.special);
+    setC('rent', data.rent); setC('living', data.living); setC('special', data.special);
     if (data.extras) data.extras.forEach(ex => addExtraItem(ex.name, ex.amount));
   } catch(e) { console.warn('ロード失敗', e); }
 }
