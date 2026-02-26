@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ダイ・ウィズ・ゼロ</title>
+<title>Die With Zero</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -14,7 +14,7 @@
   }
   .header { text-align: center; padding: 30px 0 20px; }
   .header h1 {
-    font-size: 2.2rem; font-weight: 900;
+    font-size: 2.4rem; font-weight: 900; letter-spacing: 0.08em;
     background: linear-gradient(90deg, #f7971e, #ffd200);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   }
@@ -34,7 +34,7 @@
   @media (max-width: 700px) {
     .grid { grid-template-columns: 1fr; }
     .summary { grid-template-columns: 1fr 1fr !important; }
-    .header h1 { font-size: 1.6rem; }
+    .header h1 { font-size: 1.8rem; }
     .save-bar { justify-content: center; }
   }
   .card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 20px; }
@@ -90,10 +90,7 @@
   .warn-banner { background: rgba(255,80,80,0.15); border: 1px solid rgba(255,80,80,0.4); border-radius: 10px; padding: 12px 18px; color: #ff8080; font-size: 0.9rem; margin-bottom: 16px; display: none; }
   .surplus-box { background: rgba(116,192,252,0.08); border: 1px solid rgba(116,192,252,0.3); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; font-size: 0.82rem; color: #aac8f0; line-height: 1.8; }
   .surplus-box strong { color: #74c0fc; }
-
-  /* 均等表示ライン強調 */
   .flat-line-hint { display: inline-block; background: rgba(255,210,0,0.15); border: 1px solid rgba(255,210,0,0.4); border-radius: 6px; padding: 2px 10px; font-size: 0.78rem; color: #ffd200; margin-left: 8px; vertical-align: middle; }
-
   .footer { text-align: center; color: #555; font-size: 0.75rem; padding: 20px 0; }
   .divider { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 12px 0; }
 </style>
@@ -101,7 +98,7 @@
 <body>
 <div class="container">
   <div class="header">
-    <h1>💀 ダイ・ウィズ・ゼロ</h1>
+    <h1>💀 Die With Zero</h1>
     <p>死ぬときに資産をゼロにする — 人生を最大限に豊かに使うための計算ツール</p>
   </div>
 
@@ -115,7 +112,7 @@
   </div>
 
   <div id="warnBanner" class="warn-banner"></div>
-  <div class="surplus-box" id="surplusBox">計算中...</div>
+  <div class="surplus-box" id="surplusBox">各項目に金額を入力するとシミュレーションが始まります。</div>
 
   <div class="summary">
     <div class="summary-card highlight">
@@ -148,35 +145,35 @@
       <h2>👤 基本情報</h2>
       <div class="form-group"><label>現在の年齢（歳）</label><div class="input-wrap"><input class="plain-input" type="text" id="age" value="40"><span class="unit">歳</span></div></div>
       <div class="form-group"><label>💀 寿命年齢（何歳まで生きるか）</label><div class="input-wrap"><input class="life-input" type="text" id="lifeAge" value="100"><span class="unit" style="color:#ff8080">歳</span></div></div>
-      <div class="form-group"><label>現在の総資産（円）</label><div class="input-wrap"><input class="comma-input" type="text" id="assets" value="10,000,000"><span class="unit">円</span></div></div>
+      <div class="form-group"><label>現在の総資産（円）</label><div class="input-wrap"><input class="comma-input" type="text" id="assets" value="0"><span class="unit">円</span></div></div>
       <div class="form-group"><label>資産運用利回り（%/年）</label><div class="input-wrap"><input class="plain-input" type="text" id="returnRate" value="3"><span class="unit">%</span></div></div>
     </div>
 
     <div class="card">
       <h2>💰 収入</h2>
-      <div class="form-group"><label>現在の年収（円/年）</label><div class="input-wrap"><input class="comma-input" type="text" id="annualIncome" value="6,500,000"><span class="unit">円</span></div></div>
+      <div class="form-group"><label>現在の年収（円/年）</label><div class="input-wrap"><input class="comma-input" type="text" id="annualIncome" value="0"><span class="unit">円</span></div></div>
       <div class="form-group"><label>就労終了年齢（歳）</label><div class="input-wrap"><input class="plain-input" type="text" id="retireAge" value="65"><span class="unit">歳</span></div></div>
       <hr class="divider">
       <div class="form-group"><label>年金受給開始年齢（歳）</label><div class="input-wrap"><input class="plain-input" type="text" id="pensionStartAge" value="65"><span class="unit">歳</span></div></div>
-      <div class="form-group"><label>年金受給額（円/月）</label><div class="input-wrap"><input class="comma-input" type="text" id="pensionMonthly" value="150,000"><span class="unit">円</span></div></div>
+      <div class="form-group"><label>年金受給額（円/月）</label><div class="input-wrap"><input class="comma-input" type="text" id="pensionMonthly" value="0"><span class="unit">円</span></div></div>
       <div class="side-job-section">
         <h3>💼 副業収入</h3>
         <div class="age-range">
           <div class="form-group"><label>副業 開始年齢</label><div class="input-wrap"><input class="plain-input" type="text" id="sideStartAge" value="40"><span class="unit">歳</span></div></div>
           <div class="form-group"><label>副業 終了年齢</label><div class="input-wrap"><input class="plain-input" type="text" id="sideEndAge" value="70"><span class="unit">歳</span></div></div>
         </div>
-        <div class="form-group"><label>副業の年収入額（円/年）</label><div class="input-wrap"><input class="comma-input" type="text" id="sideIncome" value="1,000,000"><span class="unit">円</span></div></div>
+        <div class="form-group"><label>副業の年収入額（円/年）</label><div class="input-wrap"><input class="comma-input" type="text" id="sideIncome" value="0"><span class="unit">円</span></div></div>
       </div>
     </div>
 
     <div class="card">
       <h2>🏠 毎月の固定支出</h2>
-      <div class="form-group"><label>家賃・住居費（円/月）</label><div class="input-wrap"><input class="comma-input" type="text" id="rent" value="80,000"><span class="unit">円</span></div></div>
-      <div class="form-group"><label>毎月の生活費（円/月）</label><div class="input-wrap"><input class="comma-input" type="text" id="living" value="150,000"><span class="unit">円</span></div></div>
+      <div class="form-group"><label>家賃・住居費（円/月）</label><div class="input-wrap"><input class="comma-input" type="text" id="rent" value="0"><span class="unit">円</span></div></div>
+      <div class="form-group"><label>毎月の生活費（円/月）</label><div class="input-wrap"><input class="comma-input" type="text" id="living" value="0"><span class="unit">円</span></div></div>
     </div>
     <div class="card">
       <h2>✈️ 年間の特別支出・その他</h2>
-      <div class="form-group"><label>特別な出費（円/年）</label><div class="input-wrap"><input class="comma-input" type="text" id="special" value="500,000"><span class="unit">円</span></div></div>
+      <div class="form-group"><label>特別な出費（円/年）</label><div class="input-wrap"><input class="comma-input" type="text" id="special" value="0"><span class="unit">円</span></div></div>
       <div id="extraItems"></div>
       <button class="btn-add" onclick="addExtraItem()">＋ その他費目を追加</button>
     </div>
@@ -247,11 +244,6 @@ function fmt(n) {
   return Math.round(n).toLocaleString();
 }
 
-// ────────────────────────────────────────────
-// メイン計算
-// 「毎日D円を均等に使い続け、寿命年齢で残高がゼロ」になるDを二分探索
-// 毎年の引き出し額 = D × 365（固定）
-// ────────────────────────────────────────────
 function calculate() {
   const ca      = toNum('age');
   const lifeAge = Math.max(toNum('lifeAge'), ca + 1);
@@ -271,7 +263,6 @@ function calculate() {
   }, 0);
   const annualFixed = toNum('rent')*12 + toNum('living')*12 + toNum('special') + extraTotal;
 
-  // シミュレーション：毎年「固定費 + D×365」を引く。Dは全期間で同じ値。
   function simulate(dailyD) {
     let bal = a0;
     const annualFree = dailyD * 365;
@@ -281,37 +272,31 @@ function calculate() {
       const inc = (age < ra  ? ai      : 0)
                 + (age >= psa ? pm * 12 : 0)
                 + (age >= ss && age <= se ? si : 0);
-      // 運用益を乗せてから収入を加算し、固定費と自由使用額を引く
       bal = bal * (1 + rr) + inc - annualFixed - annualFree;
-      ti += inc;
-      te += annualFixed;
+      ti += inc; te += annualFixed;
       balArr.push(Math.round(bal));
     }
     return { balArr, finalBal: bal, ti, te };
   }
 
-  // 二分探索：finalBal = 0 になるDを求める
   let lo = 0, hi = 1_000_000_000;
   for (let i = 0; i < 64; i++) {
     const mid = (lo + hi) / 2;
     simulate(mid).finalBal > 0 ? (lo = mid) : (hi = mid);
   }
-  const optimalDaily = Math.floor((lo + hi) / 2);
+  const optimalDaily = Math.max(0, Math.floor((lo + hi) / 2));
   const { balArr, ti, te } = simulate(optimalDaily);
 
-  // グラフ用データ
   const ages = [], ad = [], dd = [];
   let za = null;
   for (let i = 0; i <= lifeAge - ca; i++) {
     const age = ca + i;
     ages.push(age + '歳');
     ad.push(balArr[i]);
-    // 1日使用額グラフは全年齢で同じ値（均等）
     dd.push(optimalDaily);
     if (balArr[i] < 0 && !za) za = age;
   }
 
-  // 概要ボックス
   const fyInc = (ca < ra ? ai : 0) + (ca >= psa ? pm*12 : 0) + (ca >= ss && ca <= se ? si : 0);
   const fySurplus = fyInc - annualFixed;
   document.getElementById('surplusBox').innerHTML =
@@ -323,7 +308,6 @@ function calculate() {
     `<strong style="color:#ffd200">毎日 ${optimalDaily.toLocaleString()}円</strong> を均等に使い続けると、` +
     `<strong style="color:#ffd200">${lifeAge}歳でちょうどゼロ</strong>になります。`;
 
-  // サマリー更新
   document.getElementById('dailySubLabel').textContent = `${ca}歳〜${lifeAge}歳まで毎日均等に使える額`;
   document.getElementById('zeroSubLabel').textContent  = `${lifeAge}歳時点の余裕資産残高`;
 
@@ -371,7 +355,6 @@ function calculate() {
     data: { labels: ages, datasets:[{
       data: dd, borderColor:'#74c0fc', backgroundColor:'rgba(116,192,252,0.1)',
       fill: true, tension: 0, pointRadius: 0, borderWidth: 2.5
-      // tension:0 で完全な水平線になる
     }]},
     options: {
       responsive: true, interaction:{mode:'index',intersect:false},
@@ -379,11 +362,7 @@ function calculate() {
         callbacks:{label: c=>' 毎日の自由使用額: '+c.parsed.y.toLocaleString()+' 円（均等固定）'}}},
       scales: {
         x: sc.x,
-        y: {
-          ...sc.y,
-          min: 0,
-          max: optimalDaily * 1.5,  // 水平線が見やすいようにY軸の余白を確保
-        }
+        y: { ...sc.y, min: 0, max: Math.max(optimalDaily * 1.5, 100) }
       }
     }
   });
